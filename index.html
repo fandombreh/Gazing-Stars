@@ -154,7 +154,7 @@
             font-size: 1rem;
         }
         
-        input {
+        input, textarea {
             padding: 15px 20px;
             border-radius: 12px;
             border: 2px solid rgba(138, 43, 226, 0.3);
@@ -165,11 +165,16 @@
             width: 100%;
         }
         
-        input:hover {
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        input:hover, textarea:hover {
             border-color: rgba(138, 43, 226, 0.5);
         }
         
-        input:focus {
+        input:focus, textarea:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 4px rgba(138, 43, 226, 0.2);
@@ -434,6 +439,7 @@
             color: var(--primary-light);
             text-align: center;
             margin-top: 1rem;
+            display: none;
         }
         
         .pulse {
@@ -443,6 +449,29 @@
         @keyframes pulse {
             from { transform: scale(1); }
             to { transform: scale(1.05); }
+        }
+        
+        .message-options {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(30, 30, 50, 0.5);
+            border-radius: 12px;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+        }
+        
+        .toggle-options {
+            background: none;
+            border: none;
+            color: var(--primary-light);
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        .toggle-options:hover {
+            color: var(--light);
         }
     </style>
 </head>
@@ -461,12 +490,30 @@
                 <label for="webhook-url">
                     <i class="fas fa-link"></i>
                     Discord Webhook URL
-                    <span class="tooltip">
-                        <i class="fas fa-info-circle"></i>
-                        <span class="tooltiptext">Enter the full Discord webhook URL you want to manage</span>
-                    </span>
                 </label>
                 <input type="text" id="webhook-url" placeholder="https://discord.com/api/webhooks/1234567890/abcdefghijklmnopqrstuvwxyz" required>
+            </div>
+            
+            <button class="toggle-options" id="toggle-options">
+                <i class="fas fa-cog"></i> Customize Messages
+            </button>
+            
+            <div class="message-options" id="message-options">
+                <div class="input-group">
+                    <label for="test-message">
+                        <i class="fas fa-comment"></i>
+                        Test Message Content
+                    </label>
+                    <textarea id="test-message" placeholder="Enter your test message content here">This is a test message from Gazing Stars Webhook Manager</textarea>
+                </div>
+                
+                <div class="input-group">
+                    <label for="spam-message">
+                        <i class="fas fa-bomb"></i>
+                        NUKE Message Content
+                    </label>
+                    <textarea id="spam-message" placeholder="Enter your spam message content here">🚀 NUKE SPAM from Gazing Stars - Message #{{COUNT}}</textarea>
+                </div>
             </div>
             
             <div class="button-group">
@@ -478,13 +525,13 @@
                     <i class="fas fa-test-tube"></i>
                     Test Webhook
                 </button>
-                <button id="spam-btn" class="pulse">
+                <button id="spam-btn">
                     <i class="fas fa-bomb"></i>
                     NUKE Webhook
                 </button>
             </div>
             
-            <div class="counter" id="counter">Messages sent: 0</div>
+            <div class="counter" id="counter">Messages sent: 0 (Speed: 0 msg/sec)</div>
             
             <div class="loading" id="loading">
                 <div class="spinner"></div>
@@ -503,6 +550,10 @@
         let spamInterval;
         let messageCount = 0;
         let isSpamming = false;
+        let lastUpdateTime = 0;
+        let messagesPerSecond = 0;
+        let messageQueue = [];
+        const MAX_QUEUE_SIZE = 100;
         
         function createStars() {
             const starsContainer = document.getElementById('stars');
@@ -585,13 +636,14 @@
         async function testWebhook(url) {
             try {
                 stopSpamming();
+                const testMessage = document.getElementById('test-message').value;
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        content: "This is a test message from Gazing Stars Webhook Manager",
+                        content: testMessage,
                         embeds: [{
                             title: "Webhook Test Successful",
                             description: "This webhook is working properly!",
@@ -623,13 +675,21 @@
         
         async function sendSpamMessage(url) {
             try {
-                const response = await fetch(url, {
+                const now = Date.now();
+                if (now - lastUpdateTime >= 1000) {
+                    messagesPerSecond = 0;
+                    lastUpdateTime = now;
+                }
+                
+                const spamMessage = document.getElementById('spam-message').value.replace('{{COUNT}}', messageCount+1);
+                
+                const request = fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        content: `🚀 NUKE SPAM #${messageCount+1} from Gazing Stars`,
+                        content: spamMessage,
                         embeds: [{
                             title: "WEBHOOK NUKE IN PROGRESS",
                             description: `This is rapid-fire message ${messageCount+1}\n\nWebhook will be spammed until page is closed or webhook is deleted.`,
@@ -640,14 +700,22 @@
                             timestamp: new Date().toISOString()
                         }]
                     })
+                }).then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response;
                 });
                 
-                messageCount++;
-                document.getElementById('counter').textContent = `Messages sent: ${messageCount}`;
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                messageQueue.push(request);
+                if (messageQueue.length > MAX_QUEUE_SIZE) {
+                    await Promise.all(messageQueue);
+                    messageQueue = [];
                 }
+                
+                messageCount++;
+                messagesPerSecond++;
+                updateCounter();
                 
                 return true;
             } catch (error) {
@@ -657,30 +725,46 @@
             }
         }
         
+        function updateCounter() {
+            document.getElementById('counter').textContent = 
+                `Messages sent: ${messageCount} (Speed: ${messagesPerSecond} msg/sec)`;
+        }
+        
         function startSpamming(url) {
             if (isSpamming) return;
             
             isSpamming = true;
             messageCount = 0;
-            document.getElementById('counter').textContent = `Messages sent: ${messageCount}`;
+            messagesPerSecond = 0;
+            lastUpdateTime = Date.now();
             document.getElementById('counter').style.display = 'block';
             document.getElementById('spam-btn').classList.add('pulse');
+            document.getElementById('spam-btn').innerHTML = '<i class="fas fa-stop"></i> STOP NUKE';
             
-            showResult('💣 NUKE ACTIVATED - Spamming webhook until stopped...', true);
+            showResult('💣 NUKE ACTIVATED - Spamming webhook at maximum speed...', true);
             
-            spamInterval = setInterval(async () => {
+            const spamLoop = async () => {
+                if (!isSpamming) return;
                 await sendSpamMessage(url);
-            }, 100);
+                setTimeout(spamLoop, 1);
+            };
+            
+            spamLoop();
         }
         
         function stopSpamming() {
             if (!isSpamming) return;
             
-            clearInterval(spamInterval);
             isSpamming = false;
             document.getElementById('spam-btn').classList.remove('pulse');
+            document.getElementById('spam-btn').innerHTML = '<i class="fas fa-bomb"></i> NUKE Webhook';
             showResult(`☢️ NUKE COMPLETE - Sent ${messageCount} messages`, true);
         }
+        
+        document.getElementById('toggle-options').addEventListener('click', () => {
+            const options = document.getElementById('message-options');
+            options.style.display = options.style.display === 'none' ? 'block' : 'none';
+        });
         
         const deleteBtn = document.getElementById('delete-btn');
         const testBtn = document.getElementById('test-btn');
@@ -771,6 +855,7 @@
         window.addEventListener('load', () => {
             createStars();
             createParticles();
+            document.getElementById('message-options').style.display = 'none';
             
             document.querySelectorAll('h1, .subtitle, .input-group, .button-group').forEach((el, index) => {
                 el.classList.add('floating');
