@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gazing Stars | Discord Webhook Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #8a2be2;
+            --primary-light: #9d4edd;
+            --secondary: #4b0082;
+            --dark: #0a0a1a;
+            --darker: #050510;
+            --light: #f8f9fa;
+            --light-dim: #e6e6fa;
+            --success: #4CAF50;
+            --error: #ff4444;
+            --warning: #ffbb33;
+            --info: #33b5e5;
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        body {
+            background: linear-gradient(-45deg, #0a0a1a, #1a1a3a, #2a2a5a, #3a3a7a);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(10, 10, 26, 0.7);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            margin-top: 2rem;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            transition: var(--transition);
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.1) 0%, transparent 70%);
+            z-index: -1;
+            animation: float 15s ease-in-out infinite;
+        }
+        
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            border-color: rgba(138, 43, 226, 0.5);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+            letter-spacing: 1px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 3px;
+        }
+        
+        .subtitle {
+            color: var(--light-dim);
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 300;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .webhook-form {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            position: relative;
+        }
+        
+        label {
+            font-weight: 600;
+            color: var(--primary-light);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        label i {
+            font-size: 1rem;
+        }
+        
+        input {
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            background-color: rgba(30, 30, 50, 0.7);
+            color: white;
+            font-size: 1rem;
+            transition: var(--transition);
+            width: 100%;
+        }
+        
+        input:hover {
+            border-color: rgba(138, 43, 226, 0.5);
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(138, 43, 226, 0.2);
+            background-color: rgba(40, 40, 60, 0.8);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 15px 30px;
+            border-radius: 12px;
+            border: none;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        #delete-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.4);
+        }
+        
+        #delete-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(138, 43, 226, 0.6);
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+        }
+        
+        #spam-btn {
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            box-shadow: 0 5px 15px rgba(255, 68, 68, 0.4);
+        }
+        
+        #spam-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 68, 68, 0.6);
+            background: linear-gradient(135deg, #ff6666, #ff4444);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button.secondary {
+            background: rgba(138, 43, 226, 0.1);
+            border: 2px solid var(--primary);
+            color: var(--primary-light);
+            box-shadow: none;
+        }
+        
+        button.secondary:hover {
+            background: rgba(138, 43, 226, 0.2);
+            color: var(--light);
+        }
+        
+        .result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+            border-left: 5px solid;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: currentColor;
+            opacity: 0.1;
+            z-index: -1;
+        }
+        
+        .success {
+            border-color: var(--success);
+            color: #c8e6c9;
+            display: block;
+        }
+        
+        .error {
+            border-color: var(--error);
+            color: #ffcdd2;
+            display: block;
+        }
+        
+        .info {
+            border-color: var(--info);
+            color: #b3e5fc;
+            display: block;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(138, 43, 226, 0.2);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            width: 100%;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(138, 43, 226, 0.2);
+        }
+        
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) infinite ease-in-out;
+            opacity: 0;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; }
+            50% { opacity: var(--opacity); }
+        }
+        
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(10px);
+            opacity: 0.3;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem 1.5rem;
+                border-radius: 15px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            button {
+                min-width: 100%;
+                padding: 12px 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--darker);
+            color: var(--light);
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+            border: 1px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .floating {
+            animation: floating 6s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .delay-1 { animation-delay: 0.5s; }
+        .delay-2 { animation-delay: 1s; }
+        .delay-3 { animation-delay: 1.5s; }
+        
+        .counter {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-light);
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .pulse {
+            animation: pulse 0.5s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container floating">
+        <header>
+            <h1>Gazing Stars</h1>
+            <p class="subtitle">Advanced Discord webhook management tool</p>
+        </header>
+        
+        <div class="webhook-form">
+            <div class="input-group">
+                <label for="webhook-url">
+                    <i class="fas fa-link"></i>
+                    Discord Webhook URL
+                    <span class="tooltip">
+                        <i class="fas fa-info-circle"></i>
+                        <span class="tooltiptext">Enter the full Discord webhook URL you want to manage</span>
+                    </span>
+                </label>
+                <input type="text" id="webhook-url" placeholder="https://discord.com/api/webhooks/1234567890/abcdefghijklmnopqrstuvwxyz" required>
+            </div>
+            
+            <div class="button-group">
+                <button id="delete-btn">
+                    <i class="fas fa-trash-alt"></i>
+                    Delete Webhook
+                </button>
+                <button class="secondary" id="test-btn">
+                    <i class="fas fa-test-tube"></i>
+                    Test Webhook
+                </button>
+                <button id="spam-btn" class="pulse">
+                    <i class="fas fa-bomb"></i>
+                    NUKE Webhook
+                </button>
+            </div>
+            
+            <div class="counter" id="counter">Messages sent: 0</div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing your request...</p>
+            </div>
+            
+            <div class="result" id="result"></div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2025 Gazing Stars | Use Responsibly | <a href="#" style="color: var(--primary-light); text-decoration: none;">Privacy Policy</a></p>
+    </footer>
+    
+    <script>
+        let spamInterval;
+        let messageCount = 0;
+        let isSpamming = false;
+        
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 150;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                const size = Math.random() * 3;
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const duration = Math.random() * 8 + 5;
+                const delay = Math.random() * 10;
+                const opacity = Math.random() * 0.8 + 0.2;
+                
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${x}%`;
+                star.style.top = `${y}%`;
+                star.style.setProperty('--duration', `${duration}s`);
+                star.style.setProperty('--opacity', opacity);
+                star.style.animationDelay = `${delay}s`;
+                star.style.animation = `twinkle ${duration}s ease-in-out ${delay}s infinite`;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 10;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.classList.add(`delay-${i % 3 + 1}`);
+                
+                const size = Math.random() * 200 + 100;
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${x}%`;
+                particle.style.top = `${y}%`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        function isValidWebhook(url) {
+            return /^https?:\/\/(?:discord\.com|discordapp\.com)\/api(?:\/v\d+)?\/webhooks\/\d+\/[\w-]+(?:\?.*)?$/.test(url);
+        }
+        
+        async function deleteWebhook(url) {
+            try {
+                stopSpamming();
+                const response = await fetch(url, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    return { success: true, message: '✅ Webhook deleted successfully!' };
+                } else {
+                    const data = await response.json();
+                    return { 
+                        success: false, 
+                        message: `❌ ${data.message || `Failed to delete webhook (Status: ${response.status})`}`
+                    };
+                }
+            } catch (error) {
+                return { 
+                    success: false, 
+                    message: `❌ An error occurred: ${error.message}`
+                };
+            }
+        }
+        
+        async function testWebhook(url) {
+            try {
+                stopSpamming();
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        content: "This is a test message from Gazing Stars Webhook Manager",
+                        embeds: [{
+                            title: "Webhook Test Successful",
+                            description: "This webhook is working properly!",
+                            color: 0x8A2BE2,
+                            footer: {
+                                text: "Gazing Stars Webhook Manager"
+                            },
+                            timestamp: new Date().toISOString()
+                        }]
+                    })
+                });
+                
+                if (response.ok) {
+                    return { success: true, message: '✅ Webhook test successful! Check your Discord channel.' };
+                } else {
+                    const data = await response.json();
+                    return { 
+                        success: false, 
+                        message: `❌ ${data.message || `Webhook test failed (Status: ${response.status})`}`
+                    };
+                }
+            } catch (error) {
+                return { 
+                    success: false, 
+                    message: `❌ An error occurred: ${error.message}`
+                };
+            }
+        }
+        
+        async function sendSpamMessage(url) {
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        content: `🚀 NUKE SPAM #${messageCount+1} from Gazing Stars`,
+                        embeds: [{
+                            title: "WEBHOOK NUKE IN PROGRESS",
+                            description: `This is rapid-fire message ${messageCount+1}\n\nWebhook will be spammed until page is closed or webhook is deleted.`,
+                            color: 0xFF4444,
+                            footer: {
+                                text: "Gazing Stars Webhook NUKE"
+                            },
+                            timestamp: new Date().toISOString()
+                        }]
+                    })
+                });
+                
+                messageCount++;
+                document.getElementById('counter').textContent = `Messages sent: ${messageCount}`;
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return true;
+            } catch (error) {
+                stopSpamming();
+                showResult(`❌ Spam failed: ${error.message}`, false);
+                return false;
+            }
+        }
+        
+        function startSpamming(url) {
+            if (isSpamming) return;
+            
+            isSpamming = true;
+            messageCount = 0;
+            document.getElementById('counter').textContent = `Messages sent: ${messageCount}`;
+            document.getElementById('counter').style.display = 'block';
+            document.getElementById('spam-btn').classList.add('pulse');
+            
+            showResult('💣 NUKE ACTIVATED - Spamming webhook until stopped...', true);
+            
+            spamInterval = setInterval(async () => {
+                await sendSpamMessage(url);
+            }, 100);
+        }
+        
+        function stopSpamming() {
+            if (!isSpamming) return;
+            
+            clearInterval(spamInterval);
+            isSpamming = false;
+            document.getElementById('spam-btn').classList.remove('pulse');
+            showResult(`☢️ NUKE COMPLETE - Sent ${messageCount} messages`, true);
+        }
+        
+        const deleteBtn = document.getElementById('delete-btn');
+        const testBtn = document.getElementById('test-btn');
+        const spamBtn = document.getElementById('spam-btn');
+        const webhookUrlInput = document.getElementById('webhook-url');
+        const resultDiv = document.getElementById('result');
+        const loadingDiv = document.getElementById('loading');
+        
+        deleteBtn.addEventListener('click', async () => {
+            const url = webhookUrlInput.value.trim();
+            
+            if (!url) {
+                showResult('Please enter a webhook URL', false);
+                return;
+            }
+            
+            if (!isValidWebhook(url)) {
+                showResult('Invalid Discord webhook URL format', false);
+                return;
+            }
+            
+            showLoading();
+            const result = await deleteWebhook(url);
+            hideLoading();
+            showResult(result.message, result.success);
+            
+            if (result.success) {
+                webhookUrlInput.value = '';
+                stopSpamming();
+            }
+        });
+        
+        testBtn.addEventListener('click', async () => {
+            const url = webhookUrlInput.value.trim();
+            
+            if (!url) {
+                showResult('Please enter a webhook URL to test', false);
+                return;
+            }
+            
+            if (!isValidWebhook(url)) {
+                showResult('Invalid Discord webhook URL format', false);
+                return;
+            }
+            
+            showLoading();
+            const result = await testWebhook(url);
+            hideLoading();
+            showResult(result.message, result.success);
+        });
+        
+        spamBtn.addEventListener('click', async () => {
+            const url = webhookUrlInput.value.trim();
+            
+            if (!url) {
+                showResult('Please enter a webhook URL to spam', false);
+                return;
+            }
+            
+            if (!isValidWebhook(url)) {
+                showResult('Invalid Discord webhook URL format', false);
+                return;
+            }
+            
+            if (isSpamming) {
+                stopSpamming();
+                return;
+            }
+            
+            startSpamming(url);
+        });
+        
+        function showLoading() {
+            loadingDiv.style.display = 'flex';
+            resultDiv.style.display = 'none';
+        }
+        
+        function hideLoading() {
+            loadingDiv.style.display = 'none';
+        }
+        
+        function showResult(message, isSuccess) {
+            resultDiv.textContent = message;
+            resultDiv.className = isSuccess ? 'result success' : 'result error';
+            resultDiv.style.display = 'block';
+        }
+        
+        window.addEventListener('load', () => {
+            createStars();
+            createParticles();
+            
+            document.querySelectorAll('h1, .subtitle, .input-group, .button-group').forEach((el, index) => {
+                el.classList.add('floating');
+                el.style.animationDelay = `${index * 0.2}s`;
+            });
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            stopSpamming();
+        });
+    </script>
+</body>
+</html>
